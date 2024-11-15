@@ -18,15 +18,19 @@ module.exports = {
   },
   plugins: ["jest"],
   rules: {
-    'no-console': 'off',
-    'no-shadow': 'off',
-    'no-restricted-syntax': [
-      'error',
-      'LabeledStatement',
-      'WithStatement',
+    "no-console": "off",
+    "no-shadow": "off",
+    "no-restricted-syntax": [
+      "error",
+      "LabeledStatement",
+      "WithStatement",
     ],
-    'no-underscore-dangle': ['error', { 'allowAfterThis': true }],
-    'max-classes-per-file': 'off'  // On ajoute cette ligne
+    'no-underscore-dangle': [
+      'error',
+      {
+        'allowAfterThis': true
+      }
+    ]
   },
   overrides:[
     {
