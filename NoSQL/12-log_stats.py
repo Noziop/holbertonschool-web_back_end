@@ -18,14 +18,14 @@ def print_nginx_logs_stats():
     methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     for method in methods:
         count = logs_collection.count_documents({"method": method})
-        print(f"    method {method}: {count}")
+        print(f"\tmethod {method}: {count}") #Note the explicit use of "\t" tab
 
     # Status check
     status_check = logs_collection.count_documents({
         "method": "GET",
         "path": "/status"
     })
-    print(f"{status_check} status check")
+    print(f"{status_check} status check") #Note the CHANGE from checks to check here
 
 
 if __name__ == "__main__":
