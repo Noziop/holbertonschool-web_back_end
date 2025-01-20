@@ -6,13 +6,13 @@ const readDatabase = async (path) => {
     const lines = data.trim().split('\n');
     const students = lines.slice(1).filter((line) => line.length > 0);
     const fields = {};
-    
+
     students.forEach((student) => {
       const [firstName, , , field] = student.split(',');
       if (!fields[field]) fields[field] = [];
       fields[field].push(firstName);
     });
-    
+
     return fields;
   } catch (error) {
     throw new Error('Cannot load the database');
