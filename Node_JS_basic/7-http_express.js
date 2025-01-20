@@ -11,7 +11,7 @@ const countStudents = async (path) => {
     const students = lines.slice(1).filter((line) => line.length > 0);
     const fields = {};
     let output = '';
-    
+
     students.forEach((student) => {
       const [firstName, , , field] = student.split(',');
       if (!fields[field]) fields[field] = { count: 0, names: [] };
