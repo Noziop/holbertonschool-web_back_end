@@ -17,12 +17,11 @@ const countStudents = async (path) => {
     });
 
     output += `Number of students: ${students.length}\n`;
-    for (const [field, data] of Object.entries(fields)) {
+    const entries = Object.entries(fields);
+    entries.forEach(([field, data], index) => {
       output += `Number of students in ${field}: ${data.count}. List: ${data.names.join(', ')}`;
-      if (Object.keys(fields).indexOf(field) !== Object.keys(fields).length - 1) {
-        output += '\n';
-      }
-    }
+      if (index < entries.length - 1) output += '\n';
+    });
     return output;
   } catch (error) {
     throw new Error('Cannot load the database');
@@ -32,20 +31,15 @@ const countStudents = async (path) => {
 const app = http.createServer(async (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
 
-  const { url } = req;
-  if (url === '/') {
+  if (req.url === '/') {
     res.end('Hello Holberton School!');
-  } else if (url === '/students') {
+  } else if (req.url === '/students') {
     try {
       const data = await countStudents(process.argv[2]);
       res.end(`This is the list of our students\n${data}`);
     } catch (error) {
-      res.statusCode = 404;
       res.end('Cannot load the database');
     }
-  } else {
-    res.statusCode = 404;
-    res.end('Not found');
   }
 });
 
