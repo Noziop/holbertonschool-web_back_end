@@ -1,36 +1,54 @@
 const http = require('http');
+const { readFile } = require('fs').promises;
 
-const args = process.argv.slice(2);
-const countStudents = require('./3-read_file_async');
+const countStudents = async (path) => {
+  try {
+    const data = await readFile(path, 'utf8');
+    const lines = data.trim().split('\n');
+    const students = lines.slice(1).filter((line) => line.length > 0);
+    const fields = {};
+    let output = '';
 
-const DATABASE = args[0];
+    students.forEach((student) => {
+      const [firstName, , , field] = student.split(',');
+      if (!fields[field]) fields[field] = { count: 0, names: [] };
+      fields[field].count += 1;
+      fields[field].names.push(firstName);
+    });
 
-const hostname = '127.0.0.1';
-const port = 1245;
+    output += `Number of students: ${students.length}\n`;
+    for (const [field, data] of Object.entries(fields)) {
+      output += `Number of students in ${field}: ${data.count}. List: ${data.names.join(', ')}`;
+      if (Object.keys(fields).indexOf(field) !== Object.keys(fields).length - 1) {
+        output += '\n';
+      }
+    }
+    return output;
+  } catch (error) {
+    throw new Error('Cannot load the database');
+  }
+};
 
 const app = http.createServer(async (req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
 
   const { url } = req;
-
   if (url === '/') {
-    res.write('Hello Holberton School!');
+    res.end('Hello Holberton School!');
   } else if (url === '/students') {
-    res.write('This is the list of our students\n');
     try {
-      const students = await countStudents(DATABASE);
-      res.end(`${students.join('\n')}`);
+      const data = await countStudents(process.argv[2]);
+      res.end(`This is the list of our students\n${data}`);
     } catch (error) {
-      res.end(error.message);
+      res.statusCode = 404;
+      res.end('Cannot load the database');
     }
+  } else {
+    res.statusCode = 404;
+    res.end('Not found');
   }
-  res.statusCode = 404;
-  res.end();
 });
 
-app.listen(port, hostname, () => {
-  //   console.log(`Server running at http://${hostname}:${port}/`);
-});
+app.listen(1245);
 
 module.exports = app;
