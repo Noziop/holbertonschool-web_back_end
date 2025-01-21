@@ -1,58 +1,36 @@
-const express = require('express');
-const fs = require('fs');
+const http = require('http');
 
-function countStudents(path) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(path, { encoding: 'utf-8' }, (err, data) => {
-            if (err) return reject(Error('Cannot load the database'));
-            const lines = data.split('\n').slice(1, -1);
-            const header = data.split('\n').slice(0, 1)[0].split(',');
-            const idxFn = header.findIndex((ele) => ele === 'firstname');
-            const idxFd = header.findIndex((ele) => ele === 'field');
-            const fields = {};
-            const students = {};
-            const all = {};
+const args = process.argv.slice(2);
+const countStudents = require('./3-read_file_async');
 
-            lines.forEach((line) => {
-                const list = line.split(',');
-                if (!fields[list[idxFd]]) fields[list[idxFd]] = 0;
-                fields[list[idxFd]] += 1;
-                if (!students[list[idxFd]]) students[list[idxFd]] = '';
-                students[list[idxFd]] += students[list[idxFd]]
-                    ? `, ${list[idxFn]}`
-                    : list[idxFn];
-            });
+const DATABASE = args[0];
 
-            all.numberStudents = `Number of students: ${lines.length}\n`;
-            all.listStudents = [];
-            for (const key in fields) {
-                if (Object.hasOwnProperty.call(fields, key)) {
-                    const element = fields[key];
-                    all.listStudents.push(`Number of students in ${key}: ${element}. List: ${students[key]}`);
-                }
-            }
-            return resolve(all);
-        });
-    });
-}
-
-const app = express();
+const hostname = '127.0.0.1';
 const port = 1245;
 
-app.get('/', (req, res) => {
-    res.send('Hello Holberton School!');
-});
-app.get('/students', (req, res) => {
+const app = http.createServer(async (req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+
+  const { url } = req;
+
+  if (url === '/') {
+    res.write('Hello Holberton School!');
+  } else if (url === '/students') {
     res.write('This is the list of our students\n');
-    countStudents(process.argv[2])
-        .then((data) => {
-            res.write(data.numberStudents);
-            res.end(data.listStudents.join('\n'));
-        })
-        .catch((err) => {
-            res.end(err.message);
-        });
+    try {
+      const students = await countStudents(DATABASE);
+      res.end(`${students.join('\n')}`);
+    } catch (error) {
+      res.end(error.message);
+    }
+  }
+  res.statusCode = 404;
+  res.end();
 });
-app.listen(port);
+
+app.listen(port, hostname, () => {
+  //   console.log(`Server running at http://${hostname}:${port}/`);
+});
 
 module.exports = app;
