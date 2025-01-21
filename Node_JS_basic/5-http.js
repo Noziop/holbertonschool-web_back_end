@@ -44,3 +44,8 @@ const app = http.createServer(async (req, res) => {
 app.listen(1245);
 
 module.exports = app;
+
+if (process.argv[2]) {
+  try {} catch {actuel}
+} else { 
+  res.end('This is the list of our students\n');}
